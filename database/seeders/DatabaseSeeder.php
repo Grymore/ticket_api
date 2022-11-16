@@ -27,7 +27,8 @@ class DatabaseSeeder extends Seeder
             "telpon" => "6281231231",
             "email" => "faisal@gmail.com",
             "total" => 1200000,
-            "kuantiti" => 1
+            "kuantiti" => 1,
+            "invoice" => "INV_0001"
         ]);
     }
 }

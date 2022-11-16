@@ -13,18 +13,25 @@ class ConcertController extends Controller
 {
 
 
-    public function testing($id){
+    public function callback($request){
 
 
-        $customer1 = Customer::findOrFail($id);
-        // $customer = Customer::create($validated);
+        $customer1 = DB::table('customers')
+        -> where('invoices', '=', $request)
+        -> get();
         
-        // $customer = DB::table('customers')->where('id',$id)->get();
+        if(!$customer1){
+            return response()->json([
+                "pesan" => "Ga ada no id nya coy"
+            ]);
+        }else {          
+            return response()->json([
+                "pesan" => "berhasil ngambil coy",
+                "data" => $customer1
+            ]);
+        }
         
-        return response()->json([
-            "pesan" => "berhasil ngambil coy",
-            "data" => $customer1
-        ]);
+        
     }
 
 
@@ -36,7 +43,8 @@ class ConcertController extends Controller
            "nama" => "required|string", 
            "telpon" => "required|string", 
            "email" => "required|string|unique:customers,email", 
-           "total" => "required|numeric"
+           "total" => "required|numeric",
+           "invoices" => "required|string|unique:customers,invoices", 
          ]);
 
         
@@ -57,18 +65,20 @@ class ConcertController extends Controller
             "telpon" => $request->telpon, 
             "email" => $request->email, 
             "kuantiti" => $request->total,
-            "total" => $request->total*100000 
+            "total" => $request->total*100000,
+            "invoices" => $request->invoices,
+            "status_transaksi" => $request->status_transaksi
           ]);
 
-       
+  
         $requestBody = array (
             'order' =>
                 array (
                     
                     'amount' => $request->total*100000,
-                    'invoice_number' => 'INV'.time(),
+                    'invoice_number' => $request->invoices,
                     // 'currency' => 'IDR',
-                    'callback_url' => 'http://127.0.0.1:8000//callback.php',
+                    'callback_url' => 'http://127.0.0.1:8000/redirect/'.$request->invoices,
                     'line_items' =>
                     array (
                     0 =>
@@ -152,6 +162,8 @@ class ConcertController extends Controller
             ]);
         }
     }
+
+
 
 
     
