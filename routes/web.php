@@ -27,7 +27,8 @@ Route::get('/test', function() {
 
 Route::post('/payment', 'App\Http\Controllers\ConcertController@payment');
 // Route::get('/testing/{$id}', 'App\Http\Controllers\ConcertController@testing');
-Route::get('/okedeh/{id}', [ConcertController::class, "testing"]);
+Route::get('/okedeh/{id}', [ConcertController::class, "okedeh"]);
+Route::get('/redirect/{invoices}', [ConcertController::class, "callback"]);
 
 
 

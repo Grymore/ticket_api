@@ -79,7 +79,8 @@
                         </select>
                     </div>
                     <div>
-                        <!-- <input type="text" name="total" hidden> -->
+                        <input type="text" name="invoices" value="<?php echo 'INV-'. time()?>" hidden>
+                        <input type="text" name="status_transaksi" value="PENDING" hidden>
                     </div>
                     <div class="my-5">
                         <label for="exampleFormControlInput1" class="form-label" id="show"><b>Harga Tiket</b></label>
