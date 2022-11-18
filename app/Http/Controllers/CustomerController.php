@@ -59,9 +59,6 @@ class CustomerController extends Controller
 
 
 
-
-
-
     public function update(Request $request, $id)
     {
 
@@ -98,6 +95,8 @@ class CustomerController extends Controller
         ]);
 
     }
+
+
 
     public function show($id)
     {
@@ -143,16 +142,12 @@ class CustomerController extends Controller
 
         if ($finalSignature == $notificationHeader['Signature']) {
            
-           
             $response = json_decode($notificationBody, true);
-            $invoice = $response['order']['invoice_number'];
-           
-            $cariin = DB::table('customers')->where('invoices', $invoice)->get('invoices');
-         
-        
+            $invoice = $response['order']['invoice_number'];    
+            $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'),true);
 
-            if($cariin[0] == null){
-
+            if (isset($cariin[0]['invoices']) == $invoice){
+                
                 DB::table('customers')
                     ->where('invoices', $invoice)
                     ->update(['status_transaksi' => $response['transaction']['status']]);
@@ -162,21 +157,14 @@ class CustomerController extends Controller
                         "data" => $cariin,
                         "status" => $response['transaction']['status']
                     ]);
-     
+
             }else {
 
                 return response()->json([
                     "pesan" => "gagal update datanya ora ada",
-                    "cariin" => $cariin[0],
-                    "invoice" => $invoice,
-                    "json obj" => $response['transaction']['status']
-                ]); 
-                
+                    "invoices" => $response['order']['invoice_number']
+                ]);
             }
-
-
-
-
         } else {
         
             return response()->json([
@@ -186,17 +174,6 @@ class CustomerController extends Controller
                 "siganture" => $finalSignature
             ],400);
         }
-
-
-        // $affected = DB::table('users')
-        //     ->where('id', 1)
-        //     ->update(['votes' => 1]);
-
-
-        // return response()->json([
-        //     "pesan" => "berhasil ngapusin coy data {$id}",
-
-        // ]);
     }
 
 
