@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConcertController;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,10 +27,8 @@ Route::get('/test', function() {
 
 
 Route::post('/payment', 'App\Http\Controllers\ConcertController@payment');
-// Route::get('/testing/{$id}', 'App\Http\Controllers\ConcertController@testing');
 Route::get('/okedeh/{id}', [ConcertController::class, "okedeh"]);
-Route::get('/redirect/{invoices}', [ConcertController::class, "callback"]);
-
+Route::get('/redirect/{request}', [CustomerController::class, "callback"]);
 
 
 

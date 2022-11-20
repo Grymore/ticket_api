@@ -13,26 +13,7 @@ class ConcertController extends Controller
 {
 
 
-    public function callback($request){
-
-
-        $customer1 = DB::table('customers')
-        -> where('invoices', '=', $request)
-        -> get();
-        
-        if(!$customer1){
-            return response()->json([
-                "pesan" => "Ga ada no id nya coy"
-            ]);
-        }else {          
-            return response()->json([
-                "pesan" => "berhasil ngambil coy",
-                "data" => $customer1
-            ]);
-        }
-        
-        
-    }
+ 
 
 
 
@@ -77,7 +58,7 @@ class ConcertController extends Controller
                     
                     'amount' => $request->total*100000,
                     'invoice_number' => $request->invoices,
-                    // 'currency' => 'IDR',
+                    'disable_retry_payment' => true,
                     'callback_url' => 'http://127.0.0.1:8000/redirect/'.$request->invoices,
                     'line_items' =>
                     array (
@@ -163,6 +144,8 @@ class ConcertController extends Controller
         }
     }
 
+
+    
 
 
 

@@ -91,7 +91,7 @@
 
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" value="" id="myCheckbox" required>
                         <label class="form-check-label" for="flexCheckDefault">
                             Setuju
                         </label>
@@ -100,7 +100,7 @@
 
                     <div class="text-center">
                     <br>
-                    <button type="submit" id="myBtn" class="button btn btn-primary" disabled>Lanjtukan</button>
+                    <button type="submit" id="myBtn"  class="button btn btn-primary" disabled>Lanjtukan</button>
 
                 </div>
 
@@ -112,7 +112,7 @@
         </div>
     </section>
 
-    <!-- @include('layouts.modal') -->
+
 
     @include('layouts.footer')
 
@@ -152,6 +152,8 @@ function btnActivation() {
 
     }
 }
+
+
 
 
 

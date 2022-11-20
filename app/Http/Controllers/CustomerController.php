@@ -177,4 +177,60 @@ class CustomerController extends Controller
     }
 
 
+    public function callback($request){
+
+        $sukses = "../images/75_smile.gif";
+        $pending = "../images/waiting.gif";
+        $gagal = "../images/fail.gif";
+        $gambar1 = "../images/giphy.gif";
+        $cekinvoice = json_decode(DB::table('customers')->where('invoices', $request)->get(),true);
+
+        if(isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "SUCCESS" ){
+
+            return view('redirect',[
+                
+                "invoice" => $request,
+                "gambar" => $sukses,
+                "title" => $cekinvoice[0]['status_transaksi'],
+                "body" => "Berikut ringkasan transaksi dan e-voucher Anda. 
+                Untuk kenyamanan Anda kami telah mengirimkan salinan e-voucher ke email yang telah teregistrasi. 
+                Apabila dalam 1x24 jam Anda belum menerima e-voucher,silahkan menghubungi customer service melalui email test@test.com.
+
+                "
+            ]);
+
+        }elseif(isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "PENDING" ){
+            return view('redirect',[
+                "invoice" => $request,
+                "gambar" => $pending,
+                "title" => $cekinvoice[0]['status_transaksi'],
+                "body" => "Selesaikan Pembayaran anda untuk mendapatkan e-ticket"
+            ]);
+        }elseif(isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "FAILED"){
+            return view('redirect',[
+                "invoice" => $request,
+                "gambar" => $gagal,
+                "title" => $cekinvoice[0]['status_transaksi'],
+                "body" => "Mohon coba kembali"
+            ]);
+        }
+        
+        else {
+            return view('notfound',[
+                "title" => "Data Tidak ditemukan",
+                "body" => "Coba kontak customer service",
+                "gambar" => $gambar1
+            ]);  
+
+        }
+
+
+
+
+        
+        
+        
+    }
+
+
 }
