@@ -17,29 +17,36 @@
             <span class="fs-4">E-TICKET</span>
         </a>
 
-        <ul class="nav nav-pills">
-            
-            <li class="nav-item"><a href="#" class="nav-link"><button class="btn btn-info">Print E-Ticket</button></a></li>
+        <ul class="nav nav-pills"> 
+          
+            <li class="nav-item">
+                @if ($title == "SUCCESS")     
+                <a href="#" class="nav-link"><button class="btn btn-info">Print E-Ticket</button></a>
+                @endif 
+            </li>
+         
         </ul>
+
         </header>
     
 
     <section class="tiket">
         <div class="row">
-            <div class="col-sm-12 text-center">
-               
-                
-                
+            <div class="col-sm-12 text-center">   
                 <h2>Transaksi Anda {{$title}}</h2>
                 <br>
-                
-                <p class="align-items-center">{{$body}}</p>
+                <p class="text-center">{{$body}}</p>
                 <img src="{{$gambar}}" >
             </div>
         </div>
 
-        <div class="text-center">
-        <a href="http://127.0.0.1:8000/"><button class="btn btn-primary">Kembali</button></a>
+        <div class="text-center my-3">
+        
+        @if ($title == "FAILED")
+        <a href="/"><button class="btn btn-primary">Kembali</button></a>
+        @elseif($title == "PENDING")
+        <a href="/checkstatus"><button class="btn btn-primary">CheckStatus</button></a>
+        @endif
 
         </div> 
 

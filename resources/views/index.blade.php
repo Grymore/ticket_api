@@ -81,6 +81,7 @@
                     <div>
                         <input type="text" name="invoices" value="<?php echo 'INV-'. time()?>" hidden>
                         <input type="text" name="status_transaksi" value="PENDING" hidden>
+                        <input type="text" name="qr_string" value="" hidden>
                     </div>
                     <div class="my-5">
                         <label for="exampleFormControlInput1" class="form-label" id="show"><b>Harga Tiket</b></label>

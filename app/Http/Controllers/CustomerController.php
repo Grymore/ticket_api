@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+
+use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Customer;
+use App\Models\Qr_code;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use PHPUnit\Framework\Constraint\IsNull;
-
 
 
 class CustomerController extends Controller
@@ -120,14 +121,15 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function updateStatus()
+    public function updateStatus() //Notification
+
     {
 
         $notificationHeader = getallheaders();
         $notificationBody = file_get_contents('php://input');
-        $notificationPath = '/api/notify'; // Adjust according to your notification path
-        // $clientId = 'BRN-0295-1662445176970';
-        $secretKey = 'SK-SifuCF735QJoC6okzTlc';
+        $notificationPath = '/api/notify';
+        // $clientId = 'BRN-0218-1668854741147';
+        $secretKey = 'SK-S4fMVZXAjnPsqIeHaJqc';
 
         $digest = base64_encode(hash('sha256', $notificationBody, true));
         $rawSignature = "Client-Id:" . $notificationHeader['Client-Id'] . "\n"
@@ -141,96 +143,138 @@ class CustomerController extends Controller
 
 
         if ($finalSignature == $notificationHeader['Signature']) {
-           
-            $response = json_decode($notificationBody, true);
-            $invoice = $response['order']['invoice_number'];    
-            $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'),true);
 
-            if (isset($cariin[0]['invoices']) == $invoice){
-                
+            $response = json_decode($notificationBody, true);
+            $invoice = $response['order']['invoice_number'];
+            $statusTrx = $response['transaction']['status'];
+            $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'), true);
+            $id_cust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('id'), true);
+            $kuantiti = json_decode(DB::table('customers')->where('invoices', $invoice)->get('kuantiti'), true);
+
+
+            if (isset($cariin[0]['invoices']) == $invoice && $statusTrx != "SUCCESS") {
+
                 DB::table('customers')
                     ->where('invoices', $invoice)
-                    ->update(['status_transaksi' => $response['transaction']['status']]);
-                    
-                    return response()->json([
-                        "pesan" => "berhasil update",
-                        "data" => $cariin,
-                        "status" => $response['transaction']['status']
+                    ->update(['status_transaksi' => $statusTrx]);
+
+                return response()->json([
+                    "pesan" => "status berhasil diupdate",
+                    "data" => $cariin,
+                    "status" => $statusTrx
+                ]);
+
+            } elseif (isset($cariin[0]['invoices']) == $invoice && $statusTrx == "SUCCESS") {
+
+                DB::table('customers')
+                    ->where('invoices', $invoice)
+                    ->update([
+                        'status_transaksi' => $statusTrx,
+                        'createqr' => now(+7)
                     ]);
 
-            }else {
+                for ($x = 1; $x <= $kuantiti[0]['kuantiti']; $x++) {
+                    DB::table('qr_codes')
+                        ->insert(
+                            ['customer_id' => $id_cust[0]['id']]
+
+                        );
+                }
+
+                return response()->json([
+                    "pesan" => "status berhasil diupdate",
+                    "data" => $cariin,
+                    "status" => $response['transaction']['status']
+                ]);
+
+            } else {
 
                 return response()->json([
                     "pesan" => "gagal update datanya ora ada",
-                    "invoices" => $response['order']['invoice_number']
+                    "invoices" => $invoice
                 ]);
             }
+
+
+
+
         } else {
-        
+
             return response()->json([
+                "pesan" => "invalid signature",
                 "dataHeadr" => $notificationHeader['Signature'],
                 "dataBody" => $notificationBody,
                 "digest" => $digest,
                 "siganture" => $finalSignature
-            ],400);
+            ], 400);
         }
     }
 
 
-    public function callback($request){
+
+
+    public function callback($request)
+    {
 
         $sukses = "../images/75_smile.gif";
         $pending = "../images/waiting.gif";
         $gagal = "../images/fail.gif";
         $gambar1 = "../images/giphy.gif";
-        $cekinvoice = json_decode(DB::table('customers')->where('invoices', $request)->get(),true);
+        $cekinvoice = json_decode(DB::table('customers')->where('invoices', $request)->get(), true);
 
-        if(isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "SUCCESS" ){
+        if (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "SUCCESS") {
 
-            return view('redirect',[
-                
+            return view('redirect', [
                 "invoice" => $request,
                 "gambar" => $sukses,
                 "title" => $cekinvoice[0]['status_transaksi'],
-                "body" => "Berikut ringkasan transaksi dan e-voucher Anda. 
-                Untuk kenyamanan Anda kami telah mengirimkan salinan e-voucher ke email yang telah teregistrasi. 
-                Apabila dalam 1x24 jam Anda belum menerima e-voucher,silahkan menghubungi customer service melalui email test@test.com.
-
-                "
+                "body" => "Untuk kenyamanan Anda kami telah mengirimkan salinan e-voucher ke email yang telah teregistrasi. 
+                Apabila dalam 1x24 jam Anda belum menerima e-voucher,silahkan menghubungi customer service melalui email test@test.com."
             ]);
 
-        }elseif(isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "PENDING" ){
-            return view('redirect',[
+        } elseif (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "PENDING") {
+            return view('redirect', [
                 "invoice" => $request,
                 "gambar" => $pending,
                 "title" => $cekinvoice[0]['status_transaksi'],
-                "body" => "Selesaikan Pembayaran anda untuk mendapatkan e-ticket"
+                "body" => "Segera selesaikan Pembayaran anda untuk mendapatkan e-ticket"
             ]);
-        }elseif(isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "FAILED"){
-            return view('redirect',[
+        } elseif (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "FAILED") {
+            return view('redirect', [
                 "invoice" => $request,
                 "gambar" => $gagal,
                 "title" => $cekinvoice[0]['status_transaksi'],
                 "body" => "Mohon coba kembali"
             ]);
-        }
-        
-        else {
-            return view('notfound',[
+        } else {
+            return view('notfound', [
                 "title" => "Data Tidak ditemukan",
                 "body" => "Coba kontak customer service",
                 "gambar" => $gambar1
-            ]);  
+            ]);
 
         }
 
-
-
-
-        
-        
-        
     }
 
+
+    public function print($request)
+    {
+
+        $path = base_path("public/images/qr-code.png");
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $image = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+
+        $pdf = PDF::setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true])->loadview("e-ticket", [
+            "body" => $request,
+            "qr" => $image
+        ]);
+        return $pdf->stream('invoice.pdf');
+
+        // return $pdf->download('laporan-pdf');
+
+    }
 
 }

@@ -16,4 +16,10 @@ class Customer extends Model
     ];
 
     protected $table = "customers";
+
+    public function qr_code(){
+        return $this->hasOne('App\Models\Qr_code', 'customer_id', 'id');
+    }
+
+
 }

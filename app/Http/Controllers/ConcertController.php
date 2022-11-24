@@ -88,8 +88,8 @@ class ConcertController extends Controller
         $dateTime = gmdate("Y-m-d H:i:s");
         $isoDateTime = date(DATE_ISO8601, strtotime($dateTime));
         $dateTimeFinal = substr($isoDateTime, 0, 19) . "Z";
-        $clientId = 'BRN-0295-1662445176970';
-        $secretKey = 'SK-SifuCF735QJoC6okzTlc';
+        $clientId = 'BRN-0218-1668854741147';
+        $secretKey = 'SK-S4fMVZXAjnPsqIeHaJqc';
         // $getUrl = 'https://api.doku.com';
         $getUrl = 'https://api-sandbox.doku.com';
         $targetPath = '/checkout/v1/payment';
