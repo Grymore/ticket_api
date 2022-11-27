@@ -1,7 +1,7 @@
  <!-- Remove the container if you want to extend the Footer to full width. -->
 
 
- <footer class="text-center text-white" style="background-color: #f1f1f1;">
+ <footer class="text-center text-white fixed-bottom" style="background-color: #f1f1f1; position:relative; bottom:0; width:100%; ">
                 <!-- Grid container -->
                 <div class="container pt-4">
                 <!-- Section: Social media -->

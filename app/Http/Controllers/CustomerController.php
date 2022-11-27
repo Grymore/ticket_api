@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+
+use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Customer;
+use App\Models\Qr_code;
+// use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-use PHPUnit\Framework\Constraint\IsNull;
 
 
 
@@ -57,6 +61,11 @@ class CustomerController extends Controller
 
     }
 
+
+
+
+
+
     public function update(Request $request, $id)
     {
 
@@ -94,6 +103,8 @@ class CustomerController extends Controller
 
     }
 
+
+
     public function show($id)
     {
         $customer = Customer::findOrFail($id);
@@ -116,14 +127,15 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function updateStatus()
+    public function updateStatus() //Notification
+
     {
 
         $notificationHeader = getallheaders();
         $notificationBody = file_get_contents('php://input');
-        $notificationPath = '/api/notify'; // Adjust according to your notification path
-        // $clientId = 'BRN-0295-1662445176970';
-        $secretKey = 'SK-SifuCF735QJoC6okzTlc';
+        $notificationPath = '/api/notify';
+        // $clientId = 'BRN-0218-1668854741147';
+        $secretKey = 'SK-S4fMVZXAjnPsqIeHaJqc';
 
         $digest = base64_encode(hash('sha256', $notificationBody, true));
         $rawSignature = "Client-Id:" . $notificationHeader['Client-Id'] . "\n"
@@ -137,34 +149,62 @@ class CustomerController extends Controller
 
 
         if ($finalSignature == $notificationHeader['Signature']) {
-           
-           
+
             $response = json_decode($notificationBody, true);
 
             $invoice = $response['order']['invoice_number'];
            
-            $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'),true);
+            $cariin = DB::table('customers')->where('invoices', $invoice)->get('invoices');
          
+        
 
-
-            if( isset($cariin[0]['invoices']) == $invoice){
+            if($cariin[0] == null){
 
                 DB::table('customers')
                     ->where('invoices', $invoice)
-                    ->update(['status_transaksi' => $response['transaction']['status']]);
-                    
-                    return response()->json([
-                        "pesan" => "berhasil update",
-                        "data" => $cariin,
-                        "status" => $response['transaction']['status']
+                    ->update(['status_transaksi' => $statusTrx]);
+
+                return response()->json([
+                    "pesan" => "status berhasil diupdate",
+                    "data" => $cariin,
+                    "status" => $statusTrx
+                ]);
+
+            } elseif (isset($cariin[0]['invoices']) == $invoice && $statusTrx == "SUCCESS") {
+
+                DB::table('customers')
+                    ->where('invoices', $invoice)
+                    ->update([
+                        'status_transaksi' => $statusTrx,
+                        'updated_at' => now(+7)
                     ]);
-     
-            }else {
+
+                for ($x = 1; $x <= $kuantiti[0]['kuantiti']; $x++) {
+                    $waktu = now(+7);
+                    DB::table('qr_codes')
+                        ->insert(
+                            [
+                                'customer_id' => $id_cust[0]['id'],
+                                'created_at' => $waktu,
+                                'qr_string' => Hash::make('password', [$id_cust[0]['id']])
+                            ]
+
+                        );
+                }
+
+                return response()->json([
+                    "pesan" => "status berhasil diupdate",
+                    "data" => $cariin,
+                    "status" => $response['transaction']['status']
+                ]);
+
+            } else {
 
                 return response()->json([
                     "pesan" => "gagal update datanya ora ada",
-                   
-                    "invoices" => $response['order']['invoice_number']
+                    "cariin" => $cariin[0],
+                    "invoice" => $invoice,
+                    "json obj" => $response['transaction']['status']
                 ]); 
                 
             }
@@ -173,16 +213,70 @@ class CustomerController extends Controller
 
 
         } else {
-        
+
             return response()->json([
+                "pesan" => "invalid signature",
                 "dataHeadr" => $notificationHeader['Signature'],
                 "dataBody" => $notificationBody,
                 "digest" => $digest,
                 "siganture" => $finalSignature
-            ],400);
+            ], 400);
         }
-
     }
 
+
+
+
+        // $affected = DB::table('users')
+        //     ->where('id', 1)
+        //     ->update(['votes' => 1]);
+
+
+        // return response()->json([
+        //     "pesan" => "berhasil ngapusin coy data {$id}",
+
+        // ]);
+    }
+
+
+    public function print($request)
+    {
+
+        $path = base_path("public/images/banner.webp");
+        $type = pathinfo($path, PATHINFO_EXTENSION);
+        $data = file_get_contents($path);
+        $image = 'data:image/' . $type . ';base64,' . base64_encode($data);
+
+        $dataQR = DB::table('qr_codes')
+            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
+            ->where('customers.invoices', $request)->get();
+
+        $banyak = DB::table('qr_codes')
+            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
+            ->where('customers.invoices', $request)->count();
+
+        $pdf = PDF::setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true])->loadview("download", [
+            "body" => $request,
+            "qr_strings" => $dataQR,
+            "kuantiti" => $banyak,
+            "banner" => $image
+        ])->setPaper('A4', 'portrait');
+
+
+        // return view('print_ticket',([
+        //     'qr_strings' => $dataQR
+        // ]));
+
+
+        // return $pdf->stream('invoice.pdf');
+
+        // <div class="ticket-id"> <img src="data:image/png;base64, {!! base64_encode(QrCode::size(100)->generate($qrcode->qr_string)) !!} "></div>
+
+
+        return $pdf->download('laporan-pdf');
+
+
+
+    }
 
 }

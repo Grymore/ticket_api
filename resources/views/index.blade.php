@@ -81,6 +81,7 @@
                     <div>
                         <input type="text" name="invoices" value="<?php echo 'INV-'. time()?>" hidden>
                         <input type="text" name="status_transaksi" value="PENDING" hidden>
+                        <input type="text" name="qr_string" value="" hidden>
                     </div>
                     <div class="my-5">
                         <label for="exampleFormControlInput1" class="form-label" id="show"><b>Harga Tiket</b></label>
@@ -91,7 +92,7 @@
 
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                        <input class="form-check-input" type="checkbox" value="" id="myCheckbox" required>
                         <label class="form-check-label" for="flexCheckDefault">
                             Setuju
                         </label>
@@ -100,7 +101,7 @@
 
                     <div class="text-center">
                     <br>
-                    <button type="submit" id="myBtn" class="button btn btn-primary" disabled>Lanjtukan</button>
+                    <button type="submit" id="myBtn"  class="button btn btn-primary" disabled>Lanjtukan</button>
 
                 </div>
 
@@ -112,7 +113,7 @@
         </div>
     </section>
 
-    <!-- @include('layouts.modal') -->
+
 
     @include('layouts.footer')
 
@@ -152,6 +153,8 @@ function btnActivation() {
 
     }
 }
+
+
 
 
 

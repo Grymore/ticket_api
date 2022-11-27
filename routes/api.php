@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ConcertController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,6 +23,8 @@ Route::put('/customer/{id}', [CustomerController::class, "update"]);
 Route::get('/customer/{id}', [CustomerController::class, "show"]);
 Route::delete('/customer/{id}', [CustomerController::class, "destroy"]);
 Route::post('/notify', [CustomerController::class, "updateStatus"]);
+
+Route::post('/inquiry', [ConcertController::class, "directInquiry"]);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
