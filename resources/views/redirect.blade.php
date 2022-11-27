@@ -21,7 +21,7 @@
           
             <li class="nav-item">
                 @if ($title == "SUCCESS")     
-                <a href="#" class="nav-link"><button class="btn btn-info">Print E-Ticket</button></a>
+                <a href="/print_ticket/{{$id}}" class="nav-link"><button class="btn btn-info">Print E-Ticket</button></a>
                 @endif 
             </li>
          

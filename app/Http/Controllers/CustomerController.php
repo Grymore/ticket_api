@@ -8,8 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Customer;
 use App\Models\Qr_code;
+// use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+
 
 
 class CustomerController extends Controller
@@ -170,13 +173,18 @@ class CustomerController extends Controller
                     ->where('invoices', $invoice)
                     ->update([
                         'status_transaksi' => $statusTrx,
-                        'createqr' => now(+7)
+                        'updated_at' => now(+7)
                     ]);
 
                 for ($x = 1; $x <= $kuantiti[0]['kuantiti']; $x++) {
+                    $waktu = now(+7);
                     DB::table('qr_codes')
                         ->insert(
-                            ['customer_id' => $id_cust[0]['id']]
+                            [
+                                'customer_id' => $id_cust[0]['id'],
+                                'created_at' => $waktu,
+                                'qr_string' => Hash::make('password', [$id_cust[0]['id']])
+                            ]
 
                         );
                 }
@@ -221,13 +229,24 @@ class CustomerController extends Controller
         $gagal = "../images/fail.gif";
         $gambar1 = "../images/giphy.gif";
         $cekinvoice = json_decode(DB::table('customers')->where('invoices', $request)->get(), true);
+        $dataQR = DB::table('qr_codes')
+            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
+            ->where('customers.invoices', $request)->get();
+
+        $banyak = DB::table('qr_codes')
+            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
+            ->where('customers.invoices', $request)->count();
+
 
         if (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "SUCCESS") {
 
-            return view('redirect', [
+            return view('print_ticket', [
                 "invoice" => $request,
+                "id" => $cekinvoice[0]['id'],
                 "gambar" => $sukses,
                 "title" => $cekinvoice[0]['status_transaksi'],
+                "qr_strings" => $dataQR,
+                "kuantiti" => $banyak,
                 "body" => "Untuk kenyamanan Anda kami telah mengirimkan salinan e-voucher ke email yang telah teregistrasi. 
                 Apabila dalam 1x24 jam Anda belum menerima e-voucher,silahkan menghubungi customer service melalui email test@test.com."
             ]);
@@ -261,19 +280,40 @@ class CustomerController extends Controller
     public function print($request)
     {
 
-        $path = base_path("public/images/qr-code.png");
+        $path = base_path("public/images/banner.webp");
         $type = pathinfo($path, PATHINFO_EXTENSION);
         $data = file_get_contents($path);
         $image = 'data:image/' . $type . ';base64,' . base64_encode($data);
 
+        $dataQR = DB::table('qr_codes')
+            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
+            ->where('customers.invoices', $request)->get();
 
-        $pdf = PDF::setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true])->loadview("e-ticket", [
+        $banyak = DB::table('qr_codes')
+            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
+            ->where('customers.invoices', $request)->count();
+
+        $pdf = PDF::setOptions(['isHtml5ParserEnabled' => true, 'isRemoteEnabled' => true])->loadview("download", [
             "body" => $request,
-            "qr" => $image
-        ]);
-        return $pdf->stream('invoice.pdf');
+            "qr_strings" => $dataQR,
+            "kuantiti" => $banyak,
+            "banner" => $image
+        ])->setPaper('A4', 'portrait');
 
-        // return $pdf->download('laporan-pdf');
+
+        // return view('print_ticket',([
+        //     'qr_strings' => $dataQR
+        // ]));
+
+
+        // return $pdf->stream('invoice.pdf');
+
+        // <div class="ticket-id"> <img src="data:image/png;base64, {!! base64_encode(QrCode::size(100)->generate($qrcode->qr_string)) !!} "></div>
+
+
+        return $pdf->download('laporan-pdf');
+
+
 
     }
 
