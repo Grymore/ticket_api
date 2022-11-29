@@ -183,7 +183,7 @@ class CustomerController extends Controller
                             [
                                 'customer_id' => $id_cust[0]['id'],
                                 'created_at' => $waktu,
-                                'qr_string' => Hash::make('password', [$id_cust[0]['id']])
+                                'qr_string' => md5($id_cust[0]['id'].now(+7))
                             ]
 
                         );

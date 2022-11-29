@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConcertController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ScannerController;
 
 
 
@@ -28,11 +29,14 @@ Route::get('/test', function() {
 
 
 
-Route::post('/payment', 'App\Http\Controllers\ConcertController@payment');
+Route::post('/payment', [ConcertController::class, "payment"]);
 Route::get('/okedeh/{id}', [ConcertController::class, "okedeh"]);
+
 Route::get('/redirect/{request}', [CustomerController::class, "callback"]);
 Route::get('/print_ticket/{request}', [CustomerController::class, "callback"]);
 Route::get('/download/{request}', [CustomerController::class, "print"]);
-Route::get('/scanner', [ConcertController::class, "scanner"]);
+
+Route::get('/scanner', [ScannerController::class, "scanner"]);
+Route::post('/validasi', [ScannerController::class, "validasi"]);
 
 

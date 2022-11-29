@@ -151,100 +151,60 @@ class ConcertController extends Controller
         // $clientId = 'BRN-0236-1660639706256';
         // $secretKey = 'SK-ZVplbH03WHeeBry6XSAu';
 
-        $clientId = 'BRN-0255-1648461011109';
-        $secretKey = 'SK-q20IbleXrCVxMYYThh5H';
+        $clientId = 'BRN-0274-1663724114561';
+        $secretKey = 'SK-MqFkUSSNlr7s6Gicnzey';
 
         $targetPath = '/api/inquiry';
 
-        $requestBody = array (
-            'order' => array (
-                'invoice_number' => 'INV-20210124-0001',
-                'min_amount' => 10000,
-                'max_amount' => 200000
+        $inv = 'inv' . time();
+
+        $requestBody = array(
+            'order' =>
+            array(
+                'invoice_number' => $inv,
+                'amount' => 100000
             ),
-            'virtual_account_info' => array (
-                'virtual_account_number' => '1899100712837192',
-                'info1' => 'Merchant tot',
+            'virtual_account_info' =>
+            array(
+                'virtual_account_number' => '6059303762788829',
+                'info1' => 'fak'
             ),
-            'virtual_account_inquiry' => array(
+            'virtual_account_inquiry' =>
+            array(
                 'status' => 'success'
             ),
-            'customer' => array (
-                'name' => 'iasjids',
-                'email' => 'asdas@example.com',
+            'customer' =>
+            array(
+                'name' => 'faisal',
+                'email' => 'customer@gmail.com'
             )
         );
+
         // Generate digest
         $digestValue = base64_encode(hash('sha256', json_encode($requestBody), true));
 
+        $componentSignature =
+            "Client-Id:" . $clientId . "\n" .
+            "Request-Id:" . $requestId . "\n" .
+            "Response-Timestamp:" . $dateTimeFinal . "\n" .
+            "Request-Target:" . $targetPath . "\n" .
+            "Digest:" . $digestValue;
 
 
-        $componentSignature = "Client-Id:" . $clientId . "\n" . 
-                      "Request-Id:" . $requestId . "\n" .
-                      "Request-Timestamp:" . $dateTimeFinal . "\n" . 
-                      "Request-Target:" . $targetPath . "\n" .
-                      "Digest:" . $digestValue;
-
-        // Generate signature
-        // echo $componentSignature."<br>";
         $signature = base64_encode(hash_hmac('sha256', $componentSignature, $secretKey, true));
+        $finalsignature = "HMACSHA256=" . $signature;
 
-
-
-        // return response()->json([
-        //     "order" => [
-        //         "invoice_number" => "Okokdaja",
-        //         "min_amount" => 0,
-        //         "max_amount" => 20000
-        //     ],
-        //     "virtual_account_info" => [
-        //         "virtual_account_number" => "1899100712837192",
-        //         "info1" => "Thanks for shooping"
-        //     ],
-        //     "virtual_account_inquiry" => [
-        //         "status" => "success"
-        //     ],
-        //     "customer" => [
-        //         "name" => "ecudoar",
-        //         "phone" => "6282240958466",
-        //         "email" => "test@sk.com"
-        //     ]
-        // ], 200)
-        return response($requestBody)
+        return response()->json($requestBody)
             ->withHeaders([
-                'Content-Type' => 'application/json',
                 'Client-Id' => $clientId,
                 'Request-Id' => $requestId,
                 'Response-Timestamp' => $dateTimeFinal,
-                'Signature' => "HMACSHA256=" . $signature,
-                'digis' => $digestValue,
-                'waktu' => $notificationHeader['Request-Timestamp']
+                'Signature' => $finalsignature
+
+
             ]);
-
-
-
     }
-// }
 
-// Signature gue = HMACSHA256=2fRHCYki5d6+1oiF0pzsj4sVeuryKU3C/xq+psUtMH4=
-// doku = HMACSHA256=mg6EeDS39vtDdg3vhxTCiGFwlhyMieSNp9TnwTc3MZs=
-
-
-// Client-Id: BRN-0218-1668854741147
-// Request-Id:ONLINE_TO_OFFLINE_ALFA2226221125174215456107189774613000169006
-// Response-Timestamp:2022-11-25T10:42:15Z
-// Request-Target:/api/inquiry
-// Digest:MgOZf1yUsgxMpfC1tY+ftqzhBx+CyzHQ6DbAj7eFi6Y= 
-
-
-// Client-Id: BRN-0218-1668854741147
-// Request-Id: ONLINE_TO_OFFLINE_ALFA2226221125174215456107189774613000169006
-// Response-Timestamp: 2022-11-25T10:42:15Z
-// Signature: HMACSHA256=2fRHCYki5d6+1oiF0pzsj4sVeuryKU3C/xq+psUtMH4=
-
-    public function scanner(){
-        return view('scanner', []);
-    }
 
 
 
