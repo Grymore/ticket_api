@@ -7,11 +7,10 @@ use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Customer;
-use App\Models\Qr_code;
-// use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use App\Mail\KirimEmail;
+use Illuminate\Support\Facades\Mail;
 
 
 
@@ -152,9 +151,19 @@ class CustomerController extends Controller
             $statusTrx = $response['transaction']['status'];
             $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'), true);
             $id_cust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('id'), true);
+            $nama_cust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('nama'), true);
             $kuantiti = json_decode(DB::table('customers')->where('invoices', $invoice)->get('kuantiti'), true);
+            $emailcust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('email'), true);
 
 
+            $data = [
+                'title' => 'Selamat datang!',
+                'url' => 'http://127.0.0.1:8000/redirect/'.$cariin[0]['invoices'],
+                'invoice' => $cariin[0]['invoices'],
+                'nama' => $nama_cust[0]['nama']
+            ];
+
+        
             if (isset($cariin[0]['invoices']) == $invoice && $statusTrx != "SUCCESS") {
 
                 DB::table('customers')
@@ -183,14 +192,19 @@ class CustomerController extends Controller
                             [
                                 'customer_id' => $id_cust[0]['id'],
                                 'created_at' => $waktu,
-                                'qr_string' => md5($id_cust[0]['id'].now(+7))
-                            ]
+                                'qr_string' => md5($x.$id_cust[0]['id'].now(+7))
+                            ],
 
                         );
                 }
+                
+                Mail::to($emailcust)->send(new KirimEmail($data));
+
+
 
                 return response()->json([
-                    "pesan" => "status berhasil diupdate",
+                    "pesan" => "Pembelian berhasil",
+                    "email" => "Email terkirim ke ". $emailcust[0]['email'],
                     "data" => $cariin,
                     "status" => $response['transaction']['status']
                 ]);

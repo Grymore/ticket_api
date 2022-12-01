@@ -35,7 +35,7 @@
             </div>
             <div class="my-3 col-md-4 text-center"
                 style="border-top: 5px solid grey; border-bottom: 5px solid grey;  padding: 10px">
-                
+
                 <img src="{{$banner}}" width="150px" height="150px">
 
 
@@ -125,5 +125,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous">
-	</body >
-</html >
+    < /body > <
+    /html >

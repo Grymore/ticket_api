@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConcertController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ScannerController;
+use App\Http\Controllers\SentEmailController;
 
 
 
@@ -39,4 +40,5 @@ Route::get('/download/{request}', [CustomerController::class, "print"]);
 Route::get('/scanner', [ScannerController::class, "scanner"]);
 Route::post('/validasi', [ScannerController::class, "validasi"]);
 
+Route::get('/pesanemail', [SentEmailController::class, "kirimemail"]);
 
