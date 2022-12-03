@@ -156,11 +156,16 @@ class CustomerController extends Controller
             $emailcust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('email'), true);
 
 
+            $gambar1 = "../images/giphy.gif";
+
+
             $data = [
                 'title' => 'Selamat datang!',
                 'url' => 'http://127.0.0.1:8000/redirect/'.$cariin[0]['invoices'],
                 'invoice' => $cariin[0]['invoices'],
-                'nama' => $nama_cust[0]['nama']
+                'nama' => $nama_cust[0]['nama'],
+                'gambar' => $gambar1 ,
+                'status' => $statusTrx
             ];
 
         

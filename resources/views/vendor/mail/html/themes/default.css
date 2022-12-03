@@ -60,10 +60,11 @@ h3 {
 }
 
 p {
-    font-size: 16px;
+    font-size: 13px;
     line-height: 1.5em;
     margin-top: 0;
     text-align: left;
+    color: black;
 }
 
 p.sub {
@@ -117,6 +118,7 @@ img {
     width: 75px;
 }
 
+
 /* Body */
 
 .body {
@@ -167,6 +169,7 @@ img {
     padding: 0;
     text-align: center;
     width: 570px;
+    border-top: 1px solid #edf2f7;
 }
 
 .footer p {
@@ -194,11 +197,12 @@ img {
     border-bottom: 1px solid #edeff2;
     margin: 0;
     padding-bottom: 8px;
+    font-size: 12px;
 }
 
 .table td {
     color: #74787e;
-    font-size: 15px;
+    font-size: 10px;
     line-height: 18px;
     margin: 0;
     padding: 10px 0;

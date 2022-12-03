@@ -35,6 +35,7 @@ Route::get('/okedeh/{id}', [ConcertController::class, "okedeh"]);
 
 Route::get('/redirect/{request}', [CustomerController::class, "callback"]);
 Route::get('/print_ticket/{request}', [CustomerController::class, "callback"]);
+
 Route::get('/download/{request}', [CustomerController::class, "print"]);
 
 Route::get('/scanner', [ScannerController::class, "scanner"]);

@@ -51,7 +51,7 @@ class KirimEmail extends Mailable
     // ]);
 
         return $this->markdown('pesanemail')
-                    ->subject('Tiket Konser 2023')
+                    ->subject('E-Tiket Konser Denny Cak Nan 2023 - Madiun')
                     ->with('data', $this->data);
 }
 
