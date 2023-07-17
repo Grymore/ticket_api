@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\DB;
 use App\Mail\KirimEmail;
 use Illuminate\Support\Facades\Mail;
 
-
-
 class CustomerController extends Controller
 {
     public function index()
@@ -53,14 +51,12 @@ class CustomerController extends Controller
                 "errors" => $e->getMessage()
             ]);
         }
-
         return response()->json([
             "pesan" => "berhasil coy",
             "terdaftar" => $createdCustomer
         ]);
 
     }
-
 
 
     public function update(Request $request, $id)
