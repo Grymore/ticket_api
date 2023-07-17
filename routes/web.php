@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ConcertController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ScannerController;
+use App\Http\Controllers\SentEmailController;
 
 
 
@@ -32,11 +33,15 @@ Route::get('/test', function() {
 Route::post('/payment', [ConcertController::class, "payment"]);
 Route::get('/okedeh/{id}', [ConcertController::class, "okedeh"]);
 
+Route::get('/checkstatus/{request}', [ConcertController::class, "checkStatus"]);
+
 Route::get('/redirect/{request}', [CustomerController::class, "callback"]);
 Route::get('/print_ticket/{request}', [CustomerController::class, "callback"]);
+
 Route::get('/download/{request}', [CustomerController::class, "print"]);
 
 Route::get('/scanner', [ScannerController::class, "scanner"]);
 Route::post('/validasi', [ScannerController::class, "validasi"]);
 
+Route::get('/pesanemail', [SentEmailController::class, "kirimemail"]);
 

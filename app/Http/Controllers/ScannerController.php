@@ -21,35 +21,51 @@ class ScannerController extends Controller
         $qr = $request->qr_code;
         $data = json_decode(DB::table('qr_codes')
             ->where('qr_string', $qr)
-            ->get('qr_string'));
+            ->get('qr_string'), true);
         
-        $dataatem = DB::table('qr_codes')
-            ->where('qr_string', $request)
-            ->get();
+        $dataatem = json_decode(DB::table('qr_codes')
+            ->where('qr_string', $qr)
+            ->get('attemp'),true);
 
-        if ($qr == $data && $dataatem == NULL ) {
+        if (isset($data[0]['qr_string']) == $qr && isset($dataatem[0]['attemp']) == NULL ) {
 
           
             DB::table('qr_codes')
                 ->where('qr_string', $qr)
-                ->update(['createAt' => now(+7)]);
+                ->update([
+                    'attemp'=> + 1,
+                    'createAt' => now(+7)
+                ]);
 
             return response()->json([
                 "status" => 200,
-                "data" => "bisa bos" 
+                "data" => "bisa bos",
+                "data1" =>  $data,
+                "data2" => $dataatem
             ]);
 
         }
-        else if($qr == $data  && $dataatem != NULL){
+        else if (isset($data[0]['qr_string']) == $qr && isset($dataatem[0]['attemp']) != NULL ){
             return response()->json([
                 "status" => 300,
-                "data" => "udah pernah bos" 
+                "data" => "udah pernah bos",
+                "data2" => $data[0],
+                "data3" => $dataatem[0]
+
+            ]);
+        }
+        else if(isset($data[0]['qr_string']) != $qr){
+
+            return response()->json([
+                "status" => 400,
+                "data" => "salah bos qr nya"
+
             ]);
         }
    
         else {
             return response()->json([
-                "status" => 400,
+                "status" => 500,
                 "data" => $data[0]['qr_string'],
                 "data1" => $request->qr_code,
                 "data2" => $dataatem

@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 
+use App\Helpers\SignatureHelper;
 use Barryvdh\DomPDF\Facade\PDF;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use App\Models\Customer;
-use App\Models\Qr_code;
-// use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-
-
+use App\Mail\KirimEmail;
+use Illuminate\Support\Facades\Mail;
 
 class CustomerController extends Controller
 {
@@ -53,17 +51,12 @@ class CustomerController extends Controller
                 "errors" => $e->getMessage()
             ]);
         }
-
         return response()->json([
             "pesan" => "berhasil coy",
             "terdaftar" => $createdCustomer
         ]);
 
     }
-
-
-
-
 
 
     public function update(Request $request, $id)
@@ -127,38 +120,33 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function updateStatus() //Notification
-
+    public function updateStatus(Request $request) //Notification
     {
 
-        $notificationHeader = getallheaders();
-        $notificationBody = file_get_contents('php://input');
-        $notificationPath = '/api/notify';
-        // $clientId = 'BRN-0218-1668854741147';
-        $secretKey = 'SK-S4fMVZXAjnPsqIeHaJqc';
+        $requestBody = $request->getContent();
+        $targetPath = '/api/notify';
 
-        $digest = base64_encode(hash('sha256', $notificationBody, true));
-        $rawSignature = "Client-Id:" . $notificationHeader['Client-Id'] . "\n"
-            . "Request-Id:" . $notificationHeader['Request-Id'] . "\n"
-            . "Request-Timestamp:" . $notificationHeader['Request-Timestamp'] . "\n"
-            . "Request-Target:" . $notificationPath . "\n"
-            . "Digest:" . $digest;
 
-        $signature = base64_encode(hash_hmac('sha256', $rawSignature, $secretKey, true));
+        $signatureHelper = new SignatureHelper();
+        $result = $signatureHelper->validationSignature($requestBody, $targetPath);
+
+        $signature = $result['signature'];
+        $signatureRequest = $result['signatureRequest'];
         $finalSignature = 'HMACSHA256=' . $signature;
 
+        if ($finalSignature == $signatureRequest) {
 
         if ($finalSignature == $notificationHeader['Signature']) {
 
             $response = json_decode($notificationBody, true);
-
             $invoice = $response['order']['invoice_number'];
-           
-            $cariin = DB::table('customers')->where('invoices', $invoice)->get('invoices');
-         
-        
+            $statusTrx = $response['transaction']['status'];
+            $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'), true);
+            $id_cust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('id'), true);
+            $kuantiti = json_decode(DB::table('customers')->where('invoices', $invoice)->get('kuantiti'), true);
 
-            if($cariin[0] == null){
+
+            if (isset($cariin[0]['invoices']) == $invoice && $statusTrx != "SUCCESS") {
 
                 DB::table('customers')
                     ->where('invoices', $invoice)
@@ -175,9 +163,9 @@ class CustomerController extends Controller
                 DB::table('customers')
                     ->where('invoices', $invoice)
                     ->update([
-                        'status_transaksi' => $statusTrx,
-                        'updated_at' => now(+7)
-                    ]);
+                            'status_transaksi' => $statusTrx,
+                            'updated_at' => now(+7)
+                        ]);
 
                 for ($x = 1; $x <= $kuantiti[0]['kuantiti']; $x++) {
                     $waktu = now(+7);
@@ -186,14 +174,17 @@ class CustomerController extends Controller
                             [
                                 'customer_id' => $id_cust[0]['id'],
                                 'created_at' => $waktu,
-                                'qr_string' => md5($id_cust[0]['id'].now(+7))
-                            ]
+                                'qr_string' => md5($x . $id_cust[0]['id'] . now(+7))
+                            ],
 
                         );
                 }
 
+                Mail::to($emailcust)->send(new KirimEmail($data));
+
                 return response()->json([
-                    "pesan" => "status berhasil diupdate",
+                    "pesan" => "Pembelian berhasil",
+                    "email" => "Email terkirim ke " . $emailcust[0]['email'],
                     "data" => $cariin,
                     "status" => $response['transaction']['status']
                 ]);
@@ -216,10 +207,9 @@ class CustomerController extends Controller
 
             return response()->json([
                 "pesan" => "invalid signature",
-                "dataHeadr" => $notificationHeader['Signature'],
-                "dataBody" => $notificationBody,
-                "digest" => $digest,
-                "siganture" => $finalSignature
+                "dataHeadr" => $signatureRequest,
+                "dataBody" => $requestBody,
+                "siganture_bikin" => $finalSignature
             ], 400);
         }
     }

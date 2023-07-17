@@ -54,7 +54,7 @@
 	<div class="container my-3" style="background-color: white;  border : 5px solid gray; ">
 		<div class="row ">
 			<div class="my-3 col-md-6 offset-md-3 text-center">
-				<strong>TICKET TYPE : SHOW: 19.00 - 21.00 WIB (275.000) {{$kuantiti}} </strong>
+				<strong>TICKET TYPE : SHOW: 19.00 - 21.00 WIB (275.000) </strong>
 				<br>
 				<strong>​​​​​​​HARGA DILUAR PAJAK TERKAIT DAN BIAYA PLATFORM </strong>
 				<br>
