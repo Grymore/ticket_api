@@ -51,7 +51,7 @@
             @if ($title == "FAILED")
             <a href="/"><button class="btn btn-primary">Kembali</button></a>
             @elseif($title == "PENDING")
-            <a href="/checkstatus"><button class="btn btn-primary">CheckStatus</button></a>
+            <a href="/checkstatus/{{$invoice}}"><button class="btn btn-primary">CheckStatus</button></a>
             @endif
 
         </div>

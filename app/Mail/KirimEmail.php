@@ -44,12 +44,6 @@ class KirimEmail extends Mailable
     //bisa menggunakan eloquent atau query builder dan diparsing ke view
 
 
-   
-
-    // return $this->view('pesanemail',[
-    //     "email" => $namacust
-    // ]);
-
         return $this->markdown('pesanemail')
                     ->subject('E-Tiket Konser Denny Cak Nan 2023 - Madiun')
                     ->with('data', $this->data);

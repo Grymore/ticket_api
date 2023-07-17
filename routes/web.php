@@ -33,6 +33,8 @@ Route::get('/test', function() {
 Route::post('/payment', [ConcertController::class, "payment"]);
 Route::get('/okedeh/{id}', [ConcertController::class, "okedeh"]);
 
+Route::get('/checkstatus/{request}', [ConcertController::class, "checkStatus"]);
+
 Route::get('/redirect/{request}', [CustomerController::class, "callback"]);
 Route::get('/print_ticket/{request}', [CustomerController::class, "callback"]);
 
