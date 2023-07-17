@@ -136,27 +136,14 @@ class CustomerController extends Controller
 
         if ($finalSignature == $signatureRequest) {
 
-            $response = json_decode($requestBody, true);
+        if ($finalSignature == $notificationHeader['Signature']) {
+
+            $response = json_decode($notificationBody, true);
             $invoice = $response['order']['invoice_number'];
             $statusTrx = $response['transaction']['status'];
             $cariin = json_decode(DB::table('customers')->where('invoices', $invoice)->get('invoices'), true);
             $id_cust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('id'), true);
-            $nama_cust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('nama'), true);
             $kuantiti = json_decode(DB::table('customers')->where('invoices', $invoice)->get('kuantiti'), true);
-            $emailcust = json_decode(DB::table('customers')->where('invoices', $invoice)->get('email'), true);
-
-
-            $gambar1 = "../images/giphy.gif";
-
-
-            $data = [
-                'title' => 'Selamat datang!',
-                'url' => 'http://127.0.0.1:8000/redirect/' . $cariin[0]['invoices'],
-                'invoice' => $cariin[0]['invoices'],
-                'nama' => $nama_cust[0]['nama'],
-                'gambar' => $gambar1,
-                'status' => $statusTrx
-            ];
 
 
             if (isset($cariin[0]['invoices']) == $invoice && $statusTrx != "SUCCESS") {
@@ -206,8 +193,11 @@ class CustomerController extends Controller
 
                 return response()->json([
                     "pesan" => "gagal update datanya ora ada",
-                    "invoices" => $invoice
-                ]);
+                    "cariin" => $cariin[0],
+                    "invoice" => $invoice,
+                    "json obj" => $response['transaction']['status']
+                ]); 
+                
             }
 
 
@@ -227,59 +217,15 @@ class CustomerController extends Controller
 
 
 
-    public function callback($request)
-    {
-
-        $sukses = "../images/75_smile.gif";
-        $pending = "../images/waiting.gif";
-        $gagal = "../images/fail.gif";
-        $gambar1 = "../images/giphy.gif";
-        $cekinvoice = json_decode(DB::table('customers')->where('invoices', $request)->get(), true);
-        $dataQR = DB::table('qr_codes')
-            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
-            ->where('customers.invoices', $request)->get();
-
-        $banyak = DB::table('qr_codes')
-            ->join('customers', 'qr_codes.customer_id', '=', 'customers.id')
-            ->where('customers.invoices', $request)->count();
+        // $affected = DB::table('users')
+        //     ->where('id', 1)
+        //     ->update(['votes' => 1]);
 
 
-        if (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "SUCCESS") {
+        // return response()->json([
+        //     "pesan" => "berhasil ngapusin coy data {$id}",
 
-            return view('print_ticket', [
-                "invoice" => $request,
-                "id" => $cekinvoice[0]['id'],
-                "gambar" => $sukses,
-                "title" => $cekinvoice[0]['status_transaksi'],
-                "qr_strings" => $dataQR,
-                "kuantiti" => $banyak,
-                "body" => "Untuk kenyamanan Anda kami telah mengirimkan salinan e-voucher ke email yang telah teregistrasi. 
-                Apabila dalam 1x24 jam Anda belum menerima e-voucher,silahkan menghubungi customer service melalui email test@test.com."
-            ]);
-
-        } elseif (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "PENDING") {
-            return view('redirect', [
-                "invoice" => $request,
-                "gambar" => $pending,
-                "title" => $cekinvoice[0]['status_transaksi'],
-                "body" => "Segera selesaikan Pembayaran anda untuk mendapatkan e-ticket"
-            ]);
-        } elseif (isset($cekinvoice[0]['invoices']) == $request && $cekinvoice[0]['status_transaksi'] == "FAILED") {
-            return view('redirect', [
-                "invoice" => $request,
-                "gambar" => $gagal,
-                "title" => $cekinvoice[0]['status_transaksi'],
-                "body" => "Mohon coba kembali"
-            ]);
-        } else {
-            return view('notfound', [
-                "title" => "Data Tidak ditemukan",
-                "body" => "Coba kontak customer service",
-                "gambar" => $gambar1
-            ]);
-
-        }
-
+        // ]);
     }
 
 

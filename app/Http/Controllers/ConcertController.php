@@ -16,6 +16,7 @@ class ConcertController extends Controller
     public function payment(Request $request)
     {
 
+
         $validator = Validator::make($request->all(), [
             "nama" => "required|string",
             "telpon" => "required|string",
@@ -23,6 +24,7 @@ class ConcertController extends Controller
             "total" => "required|numeric",
             "invoices" => "required|string|unique:customers,invoices",
         ]);
+>>>>>>> faisal
 
 
         if ($validator->fails()) {
