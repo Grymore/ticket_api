@@ -24,7 +24,7 @@ class ConcertController extends Controller
             "total" => "required|numeric",
             "invoices" => "required|string|unique:customers,invoices",
         ]);
->>>>>>> faisal
+
 
 
         if ($validator->fails()) {
